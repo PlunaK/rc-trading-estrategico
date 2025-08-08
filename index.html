@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RC Trading Estratégico</title>
+  <style>
+    body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background-color: #0a0a0a; color: #ffffff; display: flex; flex-direction: column; align-items: center; text-align: center; min-height: 100vh; padding: 40px 20px; }
+    img.logo { width: 220px; max-width: 100%; margin-bottom: 20px; }
+    h1 { margin: 10px 0 20px; font-size: 28px; color: #00aaff; }
+    p { max-width: 600px; font-size: 16px; line-height: 1.6; color: #cccccc; }
+    .buttons { margin: 30px 0; display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+    .buttons button { padding: 12px 24px; font-size: 16px; border: none; border-radius: 6px; background-color: #0077cc; color: white; cursor: pointer; transition: background-color 0.3s; }
+    .buttons button:hover { background-color: #005fa3; }
+    .form-container { margin-top: 20px; width: 100%; max-width: 420px; display: none; text-align: left; }
+    .form-container.active { display: block; }
+    label { font-size: 13px; color: #bdbdbd; }
+    input[type="text"], input[type="email"], input[type="password"] { width: 100%; padding: 10px; margin: 6px 0 12px; border: 1px solid #444; border-radius: 4px; background-color: #1a1a1a; color: white; }
+    input[type="submit"], .btn { background-color: #00aaff; color: white; border: none; padding: 10px 20px; border-radius: 4px; margin-top: 10px; cursor: pointer; }
+    input[type="submit"]:hover, .btn:hover { background-color: #008fcc; }
+    .hint { font-size: 13px; color: #9e9e9e; margin-top: 8px; }
+    .ok { color: #8bc34a; }
+    .err { color: #ff6b6b; }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <img src="logo.jpeg" alt="Logo RC Trading" class="logo">
+  <h1>RC – Trading Estratégico</h1>
+  <p>En un mundo de decisiones impulsivas y movimientos erráticos, el <strong>trading estratégico</strong> propone un enfoque profesional, planificado y disciplinado.<br> Nuestro objetivo es dejar atrás la especulación sin rumbo y reemplazarla por tácticas basadas en análisis técnico, gestión del riesgo y estructuras validadas.<br><br> Este espacio está pensado para quienes buscan operar con criterio, herramientas concretas y una mentalidad enfocada en la consistencia.</p>
+  <div class="buttons">
+    <button onclick="toggleForm('register')">Registrarse</button>
+    <button onclick="toggleForm('login')">Iniciar sesión</button>
+  </div>
+  <div id="register" class="form-container">
+    <h2>Registro</h2>
+    <form id="registerForm">
+      <label for="regName">Nombre completo</label>
+      <input id="regName" type="text" placeholder="Nombre completo" required>
+      <label for="regEmail">Correo electrónico</label>
+      <input id="regEmail" type="email" placeholder="correo@ejemplo.com" required>
+      <label for="regPass">Contraseña</label>
+      <input id="regPass" type="password" placeholder="********" minlength="6" required>
+      <input type="submit" value="Registrarse">
+      <div id="regMsg" class="hint"></div>
+    </form>
+  </div>
+  <div id="login" class="form-container">
+    <h2>Iniciar sesión</h2>
+    <form id="loginForm">
+      <label for="logEmail">Correo electrónico</label>
+      <input id="logEmail" type="email" placeholder="correo@ejemplo.com" required>
+      <label for="logPass">Contraseña</label>
+      <input id="logPass" type="password" placeholder="********" required>
+      <input type="submit" value="Ingresar">
+      <button type="button" id="resendBtn" class="btn" style="display:none">Reenviar verificación</button>
+      <div id="logMsg" class="hint"></div>
+    </form>
+  </div>
+  <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBWfsfIOOFauruoaFF4kzKqhFoOoEdur9I",
+  authDomain: "rc-trading-estrategico.firebaseapp.com",
+  projectId: "rc-trading-estrategico",
+  storageBucket: "rc-trading-estrategico.firebasestorage.app",
+  messagingSenderId: "13444936588",
+  appId: "1:13444936588:web:8153ac520372ab6b6cb739"
+};
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    function toggleForm(id) {
+      document.getElementById('register').classList.remove('active');
+      document.getElementById('login').classList.remove('active');
+      document.getElementById(id).classList.add('active');
+      document.getElementById('regMsg').textContent = '';
+      document.getElementById('logMsg').textContent = '';
+    }
+    const regForm = document.getElementById('registerForm');
+    const regMsg = document.getElementById('regMsg');
+    regForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      regMsg.textContent = 'Creando cuenta...';
+      const email = document.getElementById('regEmail').value.trim();
+      const pass = document.getElementById('regPass').value.trim();
+      auth.createUserWithEmailAndPassword(email, pass)
+        .then((cred) => cred.user.sendEmailVerification())
+        .then(() => {
+          regMsg.innerHTML = '✅ Te enviamos un correo de verificación. Revisá tu bandeja (y spam).';
+          regMsg.className = 'hint ok';
+          regForm.reset();
+        })
+        .catch((err) => {
+          regMsg.textContent = '❌ ' + err.message;
+          regMsg.className = 'hint err';
+        });
+    });
+    const loginForm = document.getElementById('loginForm');
+    const logMsg = document.getElementById('logMsg');
+    const resendBtn = document.getElementById('resendBtn');
+    loginForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      logMsg.textContent = 'Ingresando...';
+      const email = document.getElementById('logEmail').value.trim();
+      const pass = document.getElementById('logPass').value.trim();
+      auth.signInWithEmailAndPassword(email, pass)
+        .then((cred) => {
+          if (!cred.user.emailVerified) {
+            logMsg.innerHTML = '⚠️ Tu email no está verificado. Revisá tu correo o reenviá la verificación.';
+            logMsg.className = 'hint err';
+            resendBtn.style.display = 'inline-block';
+          } else {
+            logMsg.innerHTML = '✅ Sesión iniciada.';
+            logMsg.className = 'hint ok';
+	    window.location.href = 'dashboard.html';	
+          }
+        })
+        .catch((err) => {
+          logMsg.textContent = '❌ ' + err.message;
+          logMsg.className = 'hint err';
+        });
+    });
+    resendBtn.addEventListener('click', function() {
+      const user = auth.currentUser;
+      if (user && !user.emailVerified) {
+        user.sendEmailVerification()
+          .then(() => {
+            logMsg.innerHTML = '📧 Verificación reenviada.';
+            logMsg.className = 'hint ok';
+          })
+          .catch((err) => {
+            logMsg.textContent = '❌ ' + err.message;
+            logMsg.className = 'hint err';
+          });
+      } else {
+        logMsg.textContent = 'Iniciá sesión primero para reenviar la verificación.';
+      }
+    });
+  </script>
+</body>
+</html>
