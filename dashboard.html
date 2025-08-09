@@ -5,78 +5,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RC • Dashboard – Bloque 1</title>
   <style>
-    :root { --bg:#0a0a0a; --card:#121212; --muted:#bdbdbd; --text:#fff; --accent:#00aaff; --accent2:#0077cc; }
-    * { box-sizing:border-box; }
-    body { margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI', system-ui, sans-serif; }
-    .no-scroll { overflow:hidden; } /* <- bloquea scroll mientras está el cartel */
-    header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid #1f1f1f; position:sticky; top:0; background:rgba(10,10,10,.9); backdrop-filter: blur(6px); z-index:2; }
+    :root {
+      --bg: #0a0a0a; --card: #121212; --muted: #bdbdbd; --text: #ffffff; --accent: #00aaff; --accent2:#0077cc;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; }
+    header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid #1f1f1f; position:sticky; top:0; background:rgba(10,10,10,.9); backdrop-filter: blur(6px); }
     header .brand { display:flex; gap:12px; align-items:center; }
     header img { width:38px; height:38px; border-radius:8px; object-fit:cover; }
-    header h1 { font-size:18px; margin:0; letter-spacing:.4px; color:var(--accent); }
-    header .user { font-size:12px; color:var(--muted); }
+    header h1 { font-size:18px; margin:0; letter-spacing:.4px; color: var(--accent); }
+    header .user { font-size:12px; color: var(--muted); }
     header .actions { display:flex; gap:8px; }
-    button, .btn { background:var(--accent2); color:#fff; border:none; border-radius:8px; padding:10px 14px; cursor:pointer; font-weight:600; }
+    button, .btn { background: var(--accent2); color: #fff; border:none; border-radius:8px; padding:10px 14px; cursor:pointer; font-weight:600; }
     button:hover { filter:brightness(1.05); }
 
-    .layout { display:grid; grid-template-columns:320px 1fr; min-height:calc(100vh - 70px); }
+    .layout { display:grid; grid-template-columns: 320px 1fr; min-height: calc(100vh - 70px); }
+
+    /* Sidebar */
     aside { border-right:1px solid #1f1f1f; padding:16px; background:#0e0e0e; }
     .block-title { font-size:14px; color:#9ad8ff; margin:8px 0 6px; }
     .progress { background:#161616; border:1px solid #222; border-radius:12px; padding:12px; margin-bottom:16px; }
     .progress .bar { height:8px; background:#222; border-radius:30px; overflow:hidden; }
-    .progress .fill { height:100%; width:0%; background:var(--accent); transition:width .3s ease; }
+    .progress .fill { height:100%; width:0%; background:var(--accent); transition: width .3s ease; }
     .progress .label { font-size:12px; color:var(--muted); margin-top:8px; display:flex; justify-content:space-between; }
 
     .lesson-list { display:flex; flex-direction:column; gap:8px; }
     .lesson { display:flex; align-items:center; gap:10px; padding:10px; border:1px solid #222; background:#121212; border-radius:10px; cursor:pointer; }
     .lesson:hover { border-color:#2a2a2a; }
-    .lesson input { accent-color:var(--accent); }
-    .lesson .name { font-size:14px; font-weight:600; }
+    .lesson input { accent-color: var(--accent); }
+    .lesson .name { font-size:14px; }
     .lesson .dur { font-size:12px; color:var(--muted); margin-left:auto; }
 
+    /* Main */
     main { padding:20px; }
     .card { background:var(--card); border:1px solid #202020; border-radius:16px; padding:18px; }
     .title { font-size:22px; margin:0 0 6px; }
     .subtitle { font-size:13px; color:var(--muted); margin:0 0 16px; }
     .player { aspect-ratio:16/9; width:100%; background:#0c0c0c; border:1px dashed #2a2a2a; border-radius:12px; display:grid; place-items:center; color:#7a7a7a; font-size:14px; }
-
-    /* Overlay de bienvenida */
-    .welcome { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.6); z-index:999; }
-    .welcome.show { display:flex; }
-    .welcome-card { width:min(760px,92%); background:linear-gradient(135deg,#0e1b28,#0a0a0a); border:1px solid #183c5a; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,.4); overflow:hidden; }
-    .welcome-head { display:flex; gap:16px; align-items:center; padding:20px; background:radial-gradient(80% 140% at 10% 10%,#0f2b44 0%,rgba(15,43,68,0) 60%); }
-    .welcome-head img { width:56px; height:56px; border-radius:12px; }
-    .welcome-title { margin:0; color:#9ad8ff; font-size:20px; letter-spacing:.5px; }
-    .welcome-body { padding:20px; color:#d9e6f2; line-height:1.55; }
-    .welcome-body h2 { margin:0 0 10px; font-size:28px; color:#fff; }
-    .welcome-actions { display:flex; justify-content:flex-end; padding:0 20px 20px; }
-    .welcome-actions .btn { background:#00aaff; border-radius:10px; padding:10px 16px; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 </head>
-<body class="no-scroll">
-  <!-- Overlay de bienvenida -->
-  <div id="welcome" class="welcome">
-    <div class="welcome-card">
-      <div class="welcome-head">
-        <img src="logo.jpeg" alt="RC">
-        <h3 class="welcome-title">RC – Trading Estratégico</h3>
-      </div>
-      <div class="welcome-body">
-        <h2>¡Gracias por confiar en mi mentoría!</h2>
-        <p>
-          Estás entrando a un programa diseñado para <strong>convertir intuición en método</strong> y decisiones aisladas
-          en un <strong>sistema de trading</strong>. Acá vas a trabajar con estructura, gestión del riesgo y criterios medibles.
-          Tu compromiso es la clave; mi trabajo es darte <strong>claridad, proceso y exigencia</strong>.
-        </p>
-        <p style="margin-top:8px;color:#9ad8ff">Vamos a construir consistencia, una operación a la vez. Bienvenido.</p>
-      </div>
-      <div class="welcome-actions">
-        <button id="enterBtn" class="btn">Entrar al contenido</button>
-      </div>
-    </div>
-  </div>
-
+<body>
   <header>
     <div class="brand">
       <img src="logo.jpeg" alt="RC" />
@@ -86,6 +56,7 @@
       </div>
     </div>
     <div class="actions">
+      <button onclick="window.location.href='inicio.html'">Inicio</button>
       <button id="logoutBtn">Cerrar sesión</button>
     </div>
   </header>
@@ -100,7 +71,6 @@
       <div class="block">
         <div class="block-title">Bloque 1 • Plataformas y Herramientas Básicas</div>
         <div class="lesson-list" id="lessons">
-          <label class="lesson"><input type="checkbox" data-id="intro"/> <span class="name">Presentación general</span> <span class="dur">2:00</span></label>
           <label class="lesson"><input type="checkbox" data-id="tv"/> <span class="name">Tutorial TradingView</span> <span class="dur">31:08</span></label>
           <label class="lesson"><input type="checkbox" data-id="chart"/> <span class="name">Representación gráfica del precio</span> <span class="dur">12:35</span></label>
           <label class="lesson"><input type="checkbox" data-id="sr"/> <span class="name">Soportes y Resistencias</span> <span class="dur">8:27</span></label>
@@ -111,16 +81,23 @@
     </aside>
 
     <main>
+      <!-- Presentación general de todos los módulos -->
+      <div class="card" style="margin-bottom:16px">
+        <h2 class="title">Presentación general del programa</h2>
+        <p class="subtitle">Video introductorio con el objetivo, estructura y cómo usar cada bloque.</p>
+        <div class="player" id="introPlayer"></div>
+      </div>
+
       <div class="card">
-        <h2 class="title" id="lessonTitle">Presentación general del programa</h2>
-        <p class="subtitle" id="lessonSub">Usá el menú lateral para cambiar de lección.</p>
-        <div class="player" id="player"></div>
+        <h2 class="title" id="lessonTitle">Seleccioná una lección</h2>
+        <p class="subtitle" id="lessonSub">Hacé clic en una lección del Bloque 1 para verla aquí.</p>
+        <div class="player" id="player">Video/Material de la lección</div>
       </div>
     </main>
   </div>
 
   <script>
-    // Firebase (igual que en index.html)
+    // 1) Firebase Auth
     const firebaseConfig = {
       apiKey: "AIzaSyBWfsfIOOFauruoaFF4kzKqhFoOoEdur9I",
       authDomain: "rc-trading-estrategico.firebaseapp.com",
@@ -132,21 +109,25 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    // Proteger ruta
+    // 2) Proteger ruta
     auth.onAuthStateChanged((user) => {
       if (!user) { window.location.href = 'index.html'; return; }
       if (!user.emailVerified) { alert('Verificá tu email para acceder.'); auth.signOut(); return; }
       document.getElementById('userEmail').textContent = user.email;
     });
+
+    // 3) Logout
     document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut().then(()=>window.location.href='index.html'));
 
-    // Progreso local
+    // 4) Progreso con localStorage
     const boxes = Array.from(document.querySelectorAll('#lessons input[type="checkbox"]'));
     const KEY = 'rc_progress_block1';
     const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
     boxes.forEach(b => { if (saved[b.dataset.id]) b.checked = true; });
+
     function updateProgress(){
-      const total = boxes.length, done = boxes.filter(b=>b.checked).length;
+      const total = boxes.length;
+      const done = boxes.filter(b=>b.checked).length;
       const pct = Math.round((done/total)*100);
       document.getElementById('pFill').style.width = pct + '%';
       document.getElementById('pLabel').textContent = pct + '%';
@@ -156,54 +137,38 @@
     boxes.forEach(b => b.addEventListener('change', updateProgress));
     updateProgress();
 
-    // Player único
-    const player = document.getElementById('player');
+    // 5) Videos
     const titleEl = document.getElementById('lessonTitle');
     const subEl = document.getElementById('lessonSub');
-    const params = 'rel=0&modestbranding=1&controls=1&disablekb=1&iv_load_policy=3&fs=0';
-    const videoMap = {
-      intro: 'https://www.youtube-nocookie.com/embed/Y5WoPl6uwqQ',
-      tv:    'https://www.youtube-nocookie.com/embed/QBIZa4Tu28E',
-      chart: 'https://www.youtube-nocookie.com/embed/pxPCdjDX7lQ',
-      sr:    'https://www.youtube-nocookie.com/embed/pxPCdjDX7lQ',
-      trend: 'https://www.youtube-nocookie.com/embed/pxPCdjDX7lQ',
-      vrvp:  'https://www.youtube-nocookie.com/embed/pxPCdjDX7lQ'
-    };
-    function setVideo(id, name){
-      const src = (videoMap[id] || videoMap.intro) + '?' + params;
-      player.innerHTML = `<iframe width="100%" height="100%" style="aspect-ratio:16/9;border:0;border-radius:12px" src="${src}" title="Lección" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
-      titleEl.textContent = name || (id === 'intro' ? 'Presentación general del programa' : titleEl.textContent);
-      subEl.textContent = id === 'intro' ? 'Usá el menú lateral para cambiar de lección.' : 'Contenido de la lección';
-    }
-
-    // MENÚ lateral cambia el video
+    const player = document.getElementById('player');
     document.getElementById('lessons').addEventListener('click', (e)=>{
       const item = e.target.closest('.lesson'); if (!item) return;
-      const id = item.querySelector('input').dataset.id;
       const name = item.querySelector('.name').textContent;
-      setVideo(id, name);
+      titleEl.textContent = name;
+      subEl.textContent = 'Contenido de la lección';
+      player.textContent = '';
+      const videoMap = {
+        tv: 'https://www.youtube.com/embed/pxPCdjDX7lQ',
+        chart: 'https://www.youtube.com/embed/pxPCdjDX7lQ',
+        sr: 'https://www.youtube.com/embed/pxPCdjDX7lQ',
+        trend: 'https://www.youtube.com/embed/pxPCdjDX7lQ',
+        vrvp: 'https://www.youtube.com/embed/pxPCdjDX7lQ'
+      };
+      const id = item.querySelector('input').dataset.id;
+      const url = videoMap[id] || 'https://www.youtube.com/embed/pxPCdjDX7lQ';
+      const params = 'rel=0&modestbranding=1&controls=1&disablekb=1&iv_load_policy=3&fs=0';
+      const embed = url.replace('https://www.youtube.com/embed/','https://www.youtube-nocookie.com/embed/') + '?' + params;
+      player.innerHTML = `<iframe width="100%" height="100%" style="aspect-ratio:16/9;border:0;border-radius:12px" src="${embed}" sandbox="allow-same-origin allow-scripts" referrerpolicy="no-referrer"></iframe>`;
     });
 
-    // Overlay de bienvenida (carga video recién cuando entrás)
-    const welcome = document.getElementById('welcome');
-const enterBtn = document.getElementById('enterBtn');
-
-const WELCOME_KEY = 'rc_welcome_seen_v2'; // <- nueva clave
-
-if (!sessionStorage.getItem(WELCOME_KEY)) {
-  welcome.classList.add('show'); // muestra cartel
-} else {
-  document.body.classList.remove('no-scroll');
-  setVideo('intro','Presentación general del programa'); // si ya lo vio, carga directo
-}
-
-enterBtn.addEventListener('click', ()=>{
-  sessionStorage.setItem(WELCOME_KEY, '1');
-  welcome.classList.remove('show');
-  document.body.classList.remove('no-scroll');
-  setVideo('intro','Presentación general del programa');
-});
-
+    // Intro
+    (function loadIntro(){
+      const intro = document.getElementById('introPlayer');
+      if(!intro) return;
+      const base = 'https://www.youtube-nocookie.com/embed/pxPCdjDX7lQ';
+      const params = 'rel=0&modestbranding=1&disablekb=1&iv_load_policy=3&fs=0';
+      intro.innerHTML = `<iframe width="100%" height="100%" style="aspect-ratio:16/9;border:0;border-radius:12px" src="${base + '?' + params}" sandbox="allow-same-origin allow-scripts" referrerpolicy="no-referrer" title="Presentación"></iframe>`;
+    })();
   </script>
 </body>
 </html>
